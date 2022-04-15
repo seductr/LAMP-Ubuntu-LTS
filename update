@@ -1,0 +1,42 @@
+#!/bin/bash
+
+DATE=$(date +%F-%I.%M.%S)
+LOG=/root/log/update.log
+mkdir -p /root/log
+echo -e "$DATE - Starting auto update" >> $LOG
+
+system_update () {
+    apt-get update;
+    apt-get upgrade -y;
+    apt-get dist-upgrade -y;
+    apt-get autoremove -y;
+    apt-get autoclean;
+    apt-get clean;
+}
+
+system_upgrade () {
+    apt-get install ubuntu-release-upgrader-core
+    do-release-upgrade
+}
+
+install_ntpdate () {
+    if ! [ -x "$(command -v ntpdate)" ]; then
+    echo -e "CHECKING FOR NTPDATE"
+    apt-get install -y ntpdate;
+    fi
+}
+
+time_update () {
+    echo -e "updating time"
+    ntpdate -s time.nist.gov
+}
+
+
+system_update
+install_ntpdate
+time_update
+#system_upgrade
+
+DATE=$(date +%F-%I.%M.%S)
+echo -e "$DATE - Completed auto update" >> $LOG
+exit
